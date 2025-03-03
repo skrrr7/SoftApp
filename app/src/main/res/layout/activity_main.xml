@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:spacing="12dp">
+
+    <Button
+        android:id="@+id/btnCheckHealthConnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Check Health Connect" />
+
+    <Button
+        android:id="@+id/btnInsertExercise"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Insert Exercise Session" />
+
+    <Button
+        android:id="@+id/btnRecordWeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Weight" />
+
+    <Button
+        android:id="@+id/btnReadWeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read Weight Data" />
+
+    <Button
+        android:id="@+id/btnWriteWeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record Weight" />
+
+    <Button
+        android:id="@+id/btnReadExercise"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read Exercise Data" />
+
+</LinearLayout>
