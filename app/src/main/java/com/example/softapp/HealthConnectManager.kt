@@ -22,7 +22,8 @@ class HealthConnectManager(private val context: Context) {
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getWritePermission(StepsRecord::class),
         HealthPermission.getReadPermission(WeightRecord::class),
-        HealthPermission.getReadPermission(ExerciseSessionRecord::class)
+        HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+        HealthPermission.getWritePermission(WeightRecord::class)
     )
 
     // Check if all permissions are granted

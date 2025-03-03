@@ -1,6 +1,5 @@
 package com.example.softapp
 
-import androidx.health.connect.client.time.TimeRangeFilter
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -16,7 +15,6 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Energy
-import androidx.health.connect.client.request.ReadRecordsRequest
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZonedDateTime
@@ -31,14 +29,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var healthClient: HealthConnectClient
     private lateinit var healthConnectManager: HealthConnectManager
 
-    private val requestPermissions =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.all { it.value }) {
-                Toast.makeText(this, "✅ Health Connect permissions granted!", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "❌ Permissions denied!", Toast.LENGTH_SHORT).show()
-            }
+    private val requestPermissionsLauncher = registerForActivityResult(
+        healthConnectManager.requestPermissionsActivityContract() // ✅ Use the function here
+    ) { grantedPermissions ->
+        if (grantedPermissions.containsAll(healthConnectManager.permissions)) {
+            Toast.makeText(this, "✅ Permissions granted!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "❌ Permissions denied!", Toast.LENGTH_SHORT).show()
         }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,14 +54,17 @@ class MainActivity : AppCompatActivity() {
         healthConnectManager = HealthConnectManager(this)
 
         val checkButton = findViewById<Button>(R.id.btnCheckHealthConnect)
-        val insertExerciseButton = findViewById<Button>(R.id.btnInsertExercise) // Added new button
         val readWeightButton = findViewById<Button>(R.id.btnReadWeight)   // New button
         val readExerciseButton = findViewById<Button>(R.id.btnReadExercise) // New button
+        val btnRecordWeight = findViewById<Button>(R.id.btnRecordWeight)
 
         checkButton.setOnClickListener { checkHealthConnectAvailability() }
-        insertExerciseButton.setOnClickListener { requestPermissionAndInsertExerciseSession() } // Added click event
         readWeightButton.setOnClickListener { readWeightData() }  // Handle weight data retrieval
         readExerciseButton.setOnClickListener { readExerciseData() } // Handle exercise session retrieval
+        btnRecordWeight.setOnClickListener {
+            val weightInput = 70.0 // Example weight, replace with user input
+            checkPermissionsAndWriteWeight(weightInput)
+        }
     }
 
     private fun checkHealthConnectAvailability() {
@@ -73,14 +76,12 @@ class MainActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun requestPermissionAndInsertExerciseSession() {
+    private fun checkPermissionsAndWriteWeight(weightInput: Double) {
         lifecycleScope.launch {
             if (!healthConnectManager.hasAllPermissions()) {
-                requestPermissions.launch(healthConnectManager.permissions.toTypedArray())
+                requestPermissionsLauncher.launch(healthConnectManager.permissions)
             } else {
-                val startTime = ZonedDateTime.now().minusMinutes(30)
-                val endTime = ZonedDateTime.now()
-                writeExerciseSession(startTime, endTime)
+                writeWeightInput(weightInput)
             }
         }
     }
@@ -167,7 +168,7 @@ class MainActivity : AppCompatActivity() {
     }private fun readWeightData() {
         lifecycleScope.launch {
             if (!healthConnectManager.hasAllPermissions()) {
-                requestPermissions.launch(healthConnectManager.permissions.toTypedArray())
+                requestPermissionsLauncher.launch(healthConnectManager.permissions)
             } else {
                 val start = Instant.now().minus(7, ChronoUnit.DAYS) // Last 7 days
                 val end = Instant.now()
@@ -188,9 +189,9 @@ class MainActivity : AppCompatActivity() {
     private fun readExerciseData() {
         lifecycleScope.launch {
             if (!healthConnectManager.hasAllPermissions()) {
-                requestPermissions.launch(healthConnectManager.permissions.toTypedArray())
+                requestPermissionsLauncher.launch(healthConnectManager.permissions) // ✅ Fixed
             } else {
-                val start = Instant.now().minus(7, ChronoUnit.DAYS) // Last 7 days
+                val start = Instant.now().minusSeconds(86400) // Example: Last 24 hours
                 val end = Instant.now()
                 val exerciseRecords = healthConnectManager.readExerciseSessions(start, end)
 
@@ -198,13 +199,10 @@ class MainActivity : AppCompatActivity() {
                     exerciseRecords.forEach { record ->
                         Log.d("HealthConnect", "Exercise: ${record.title} from ${record.startTime} to ${record.endTime}")
                     }
-                    Toast.makeText(this@MainActivity, "✅ Exercise data retrieved!", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@MainActivity, "❌ No exercise data found!", Toast.LENGTH_SHORT).show()
+                    Log.d("HealthConnect", "No exercise records found.")
                 }
             }
         }
     }
-
-
 }
