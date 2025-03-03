@@ -25,11 +25,6 @@
         android:layout_height="wrap_content"
         android:text="Read Weight Data" />
 
-    <Button
-        android:id="@+id/btnWriteWeight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Record Weight" />
 
     <Button
         android:id="@+id/btnReadExercise"
